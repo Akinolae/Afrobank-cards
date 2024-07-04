@@ -1,0 +1,23 @@
+{
+  "name": "afrobank-cards",
+  "version": "1.0.0",
+  "description": "Card service for Afrobank",
+  "main": "/src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf node_modules && yarn",
+    "start": "nodemon ./src/index.js"
+  },
+  "author": "Akinola Makinde",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "creditcard-generator": "^0.0.7",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.4",
+    "uuid": "^10.0.0"
+  }
+}
