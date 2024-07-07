@@ -1,8 +1,7 @@
 import { response } from './responseHandler.js'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
-import { generateCreditCard, preparedCardData } from '../utils/cardUtils.js'
-import { coreProcessor } from '../../queue/index.js'
+import { generateCreditCard } from '../utils/cardUtils.js'
 import { cardCreationValidation } from '../validator/index.js'
 
 class CardsImpl {
@@ -36,11 +35,6 @@ class CardsImpl {
 
     try {
       const message = 'Card created'
-      // await coreProcessor({
-      //   processorConfig: { callBackUrl: '' },
-      //   payload: [{ ...res.body }],
-      // })
-      console.log({ d: preparedCardData({ params: { ...req.body } }) })
       response({ code: 200, message, res, success: true })
     } catch (error) {
       console.log({ error })
