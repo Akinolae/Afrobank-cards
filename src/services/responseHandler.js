@@ -1,10 +1,10 @@
 const response = ({ message, success, code, res, token, data }) => {
   res.status(code).json({
-    success: success,
-    message: message,
-    token: token,
-    data: data,
-  });
-};
+    success,
+    message,
+    token,
+    data,
+  })
+}
 
-export { response };
+export { response }
