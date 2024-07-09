@@ -38,7 +38,7 @@ class KeyManager {
     const { user_id } = args
     const currentUserKey = dummyKeys.find((key) => key.user_id === user_id)
     const getMonthDifference =
-      new Date().getMonth() - currentUserKey.createdAt.getMonth()
+      new Date().getMonth() + 1 - currentUserKey.createdAt.getMonth()
 
     if (getMonthDifference >= MAX_MONTH) {
       throw new Error('provided token deprecated')
@@ -57,8 +57,9 @@ class KeyManager {
   deprecateAPIkey = (args) => {
     this.argsValidator(args, 2)
     const { user_id, key } = args
+    const data = !!dummyKeys.length ? dummyKeys : 9
 
-    return dummyKeys.map((currentKey) => {
+    return data.map((currentKey) => {
       let updatedUserKey
       if (user_id === currentKey.user_id && currentKey.API_KEY === key) {
         updatedUserKey = {
