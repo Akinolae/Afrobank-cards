@@ -6,14 +6,14 @@ const characterTypes = {
   ALPHA_NUMERIC: 'alphanumeric',
 }
 
-const useCrypto = ({ payLoad = '', encrypt = true }) => {
+const useCrypto = ({ payLoad = '', token, encrypt = true }) => {
   let data
   const message =
     typeof payLoad === 'string' ? payLoad : JSON.stringify(payLoad)
   if (encrypt) {
-    data = CryptoJS.AES.encrypt(message, process.env.TOKEN_SECRET).toString()
+    data = CryptoJS.AES.encrypt(message, token).toString()
   } else {
-    const decryptCode = CryptoJS.AES.decrypt(message, process.env.TOKEN_SECRET)
+    const decryptCode = CryptoJS.AES.decrypt(message, token)
     data = decryptCode.toString(CryptoJS.enc.Utf8)
   }
   return data
@@ -34,16 +34,17 @@ const generateString = ({ length, type = characterTypes.NUMERIC }) => {
     default:
       break
   }
-  length = length || characters.length
+  length = length ?? characters.length
 
   for (var i = 0; i < length; i++) {
-    result += characters[Math.floor(Math.random() * characters.length)]
+    result +=
+      characters.toUpperCase()[Math.floor(Math.random() * characters.length)]
   }
   return result
 }
 
 const generateUserAccessKey = () => {
-  return generateString({ length: 12, type: characterTypes.ALPHA_NUMERIC })
+  return generateString({ length: 15, type: characterTypes.ALPHA_NUMERIC })
 }
 
 export { useCrypto, generateString, generateUserAccessKey, characterTypes }
