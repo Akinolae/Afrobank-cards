@@ -2,10 +2,18 @@ import { response } from './responseHandler.js'
 import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import { generateCreditCard } from '../utils/cardUtils.js'
+import { generateUserAccessKey } from '../utils/userUtils.js'
 import { cardCreationValidation } from '../validator/index.js'
+import KeyManager from './apiKeyManager.js'
 
-class CardsImpl {
-  async getCards(req, res) {
+class CardsImpl extends KeyManager {
+  constructor() {
+    super()
+  }
+
+  getCard = () => {}
+
+  getCards = async (req, res) => {
     try {
       const token = crypto.randomUUID()
       const hash = await bcrypt.hash(token, 10)
@@ -20,7 +28,7 @@ class CardsImpl {
     }
   }
 
-  async createCard(req, res) {
+  createCard = async (req, res) => {
     const validate = cardCreationValidation.validate(req.body)
 
     if (!!validate.error) {
@@ -32,6 +40,8 @@ class CardsImpl {
       })
       return
     }
+
+    console.log({ API_KEY: generateUserAccessKey() })
 
     try {
       const message = 'Card created'
