@@ -57,7 +57,7 @@ class KeyManager {
   deprecateAPIkey = (args) => {
     this.argsValidator(args, 2)
     const { user_id, key } = args
-    const data = !!dummyKeys.length ? dummyKeys : 9
+    const data = !!dummyKeys.length ? dummyKeys : []
 
     return data.map((currentKey) => {
       let updatedUserKey
