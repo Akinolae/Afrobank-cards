@@ -1,19 +1,5 @@
 import { generateUserAccessKey } from '../utils/userUtils.js'
-
-const dummyKeys = [
-  {
-    user_id: 1,
-    API_KEY: 'j%osn4013vm7xq',
-    createdAt: new Date(),
-  },
-  { user_id: 1, API_KEY: '2kb#uv%##cxnf@h', createdAt: new Date() },
-  { user_id: 1, API_KEY: 'h2#k^3@36yj@5zi', createdAt: new Date() },
-  { user_id: 1, API_KEY: 'm5yrt^ygw6mj^6r', createdAt: new Date() },
-  { user_id: 1, API_KEY: 'c^ge0$h0imy^rw6', createdAt: new Date() },
-  { user_id: 1, API_KEY: 'pi%eqsuox8ij7@7', createdAt: new Date() },
-  { user_id: 1, API_KEY: 'dwqll$%fv6c48q6', createdAt: new Date() },
-  { user_id: 1, API_KEY: '%jx^a6i605wkj1x', createdAt: new Date() },
-]
+import { dummyKeys } from '../../data/dummyData.js'
 
 const MAX_MONTH = 6
 class KeyManager {
@@ -34,23 +20,33 @@ class KeyManager {
   }
 
   APIkeyDepricationValidator = (args) => {
-    this.argsValidator(args)
-    const { user_id } = args
-    const currentUserKey = dummyKeys.find((key) => key.user_id === user_id)
+    this.argsValidator(args, 3)
+
+    const { user_id, API_KEY } = args
+    const currentUserKey = dummyKeys.find(
+      (key) => key.user_id === user_id && key.API_KEY === API_KEY
+    )
     const getMonthDifference =
-      new Date().getMonth() + 1 - currentUserKey.createdAt.getMonth()
+      new Date().getMonth() + 1 - new Date(currentUserKey.createdAt).getMonth()
 
     if (getMonthDifference >= MAX_MONTH) {
-      throw new Error('provided token deprecated')
+      throw new Error(
+        'DEPRECATION_ERROR: provided API_KEY is deprecated, please generate another one.'
+      )
     }
   }
 
   argsValidator = (args, length) => {
-    const keys = Object.keys(args)
+    const hasValuses = !args ? Object.keys({}) : Object.keys(args)
+
+    if (!hasValuses.length) {
+      throw new Error('VALIDATION_ERROR: args cannot be empty')
+    }
+
     length = length ?? 1
 
-    if (!keys.length || keys.length !== length) {
-      throw new Error(`args is required`)
+    if (hasValuses.length !== length) {
+      throw new Error(`VALIDATION_ERROR: validation failed`)
     }
   }
 
