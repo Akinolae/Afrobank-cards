@@ -54,7 +54,7 @@ class AuthImpl extends KeyManager {
 
       !verify
         ? response({
-            message: 'user not found',
+            message: !!apiKey ? 'Invalid API_KEY provided' : 'User not found',
             success: false,
             code: StatusCodes.UNPROCESSABLE_ENTITY,
             res,

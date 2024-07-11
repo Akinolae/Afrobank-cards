@@ -30,17 +30,19 @@ class CardsImpl extends KeyManager {
   createCard = async (req, res) => {
     const validate = cardCreationValidation.validate(req.body)
 
-    if (!!validate.error) {
-      response({
-        code: 404,
-        message: `CARD_CREATION_ERROR: ${validate.error}`,
-        res,
-        success: false,
-      })
-      return
-    }
-
     try {
+      this.APIkeyDepricationValidator(res.user)
+
+      if (!!validate.error) {
+        response({
+          code: 404,
+          message: `CARD_CREATION_ERROR: ${validate.error}`,
+          res,
+          success: false,
+        })
+        return
+      }
+
       const message = 'Card created'
       response({ code: 200, message, res, success: true })
     } catch (error) {
