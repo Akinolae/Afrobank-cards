@@ -37,15 +37,15 @@ class KeyManager {
   }
 
   argsValidator = (args, length) => {
-    const hasValuses = !args ? Object.keys({}) : Object.keys(args)
+    const hasValues = !args ? Object.keys({}) : Object.keys(args)
 
-    if (!hasValuses.length) {
+    if (!hasValues.length) {
       throw new Error('VALIDATION_ERROR: args cannot be empty')
     }
 
     length = length ?? 1
 
-    if (hasValuses.length !== length) {
+    if (hasValues.length !== length) {
       throw new Error(`VALIDATION_ERROR: validation failed`)
     }
   }
