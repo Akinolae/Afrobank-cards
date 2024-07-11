@@ -28,7 +28,8 @@ class AuthImpl extends KeyManager {
     }
   }
 
-  verifyUser = async (req, res, next) => {
+  // two way authenticator for both x-api-key and authorization
+  authenticator = async (req, res, next) => {
     let verify
     let user
     try {
@@ -38,11 +39,13 @@ class AuthImpl extends KeyManager {
       if (!!authToken) {
         const token = !!authToken ? authToken.split(' ')[1] : ''
         verify = await this.verifyUserAccessToken(token)
-        user.user_id = getValueFromAttributes(
-          verify.UserAttributes,
-          'custom:user_id'
-        )
-        user.email = getValueFromAttributes(verify.UserAttributes, 'email')
+        user = {
+          user_id: getValueFromAttributes(
+            verify.UserAttributes,
+            'custom:user_id'
+          ),
+          email: getValueFromAttributes(verify.UserAttributes, 'email'),
+        }
       }
 
       if (!!apiKey) {
