@@ -2,6 +2,7 @@ import KeyManager from './apiKeyManager.js'
 import { response } from './responseHandler.js'
 import { StatusCodes } from 'http-status-codes'
 import { getValueFromAttributes, getUserFromCognito } from '../../lib/aws.js'
+import { dummyKeys } from '../../data/dummyData.js'
 
 class AuthImpl extends KeyManager {
   constructor() {
@@ -11,7 +12,6 @@ class AuthImpl extends KeyManager {
   genAPIkey = async (req, res) => {
     try {
       const api_key = await this.createAPIKey()
-      const dep = this.deprecateAPIkey({ user_id: 1, key: '%jx^a6i605wkj1x' })
 
       response({ message: api_key, success: true, code: 200, res })
     } catch (error) {
@@ -28,31 +28,44 @@ class AuthImpl extends KeyManager {
     }
   }
 
-  verifyUser = async (req, res, next) => {
+  // two way authenticator for both x-api-key and authorization
+  authenticator = async (req, res, next) => {
+    let verify
+    let user
     try {
+      const apiKey = req.headers['x-api-key']
       const authToken = req.headers.authorization
 
-      const token = !!authToken ? authToken.split(' ')[1] : ''
-      const verify = await this.verifyUserAccessToken(token)
-      let user = {}
-      user.user_id = getValueFromAttributes(
-        verify.UserAttributes,
-        'custom:user_id'
-      )
-      user.email = getValueFromAttributes(verify.UserAttributes, 'email')
+      if (!!authToken) {
+        const token = !!authToken ? authToken.split(' ')[1] : ''
+        verify = await this.verifyUserAccessToken(token)
+        user = {
+          user_id: getValueFromAttributes(
+            verify.UserAttributes,
+            'custom:user_id'
+          ),
+          email: getValueFromAttributes(verify.UserAttributes, 'email'),
+        }
+      }
+
+      if (!!apiKey) {
+        verify = dummyKeys.find((keys) => keys.API_KEY === apiKey)
+        user = {
+          ...verify,
+        }
+      }
 
       !verify
         ? response({
-            message: 'user not found',
+            message: !!apiKey ? 'Invalid API_KEY provided' : 'User not found',
             success: false,
             code: StatusCodes.UNPROCESSABLE_ENTITY,
             res,
           })
         : (res.user = user)
-      next()
+      !!verify && next()
     } catch (error) {
       const err = error.toString()
-      console.log({ err })
       const errMessage = err.includes('invalid')
         ? error
         : err.includes('expired')

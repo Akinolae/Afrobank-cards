@@ -4,8 +4,8 @@ import { authImpl } from '../services/auth.js'
 
 const router = express.Router()
 
-router.get('/get-cards', authImpl.verifyUser, cardsImpl.getCards)
-router.post('/create-card', authImpl.verifyUser, cardsImpl.createCard)
-router.get('/get-api-key', authImpl.verifyUser, authImpl.genAPIkey)
+router.get('/get-cards', authImpl.authenticator, cardsImpl.getCards)
+router.post('/create-card', authImpl.authenticator, cardsImpl.createCard)
+router.get('/get-api-key', authImpl.authenticator, authImpl.genAPIkey)
 
 export { router }
