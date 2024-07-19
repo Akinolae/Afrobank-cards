@@ -39,6 +39,7 @@ class AuthImpl extends KeyManager {
       if (!!authToken) {
         const token = !!authToken ? authToken.split(' ')[1] : ''
         verify = await this.verifyUserAccessToken(token)
+
         user = {
           user_id: getValueFromAttributes(
             verify.UserAttributes,
