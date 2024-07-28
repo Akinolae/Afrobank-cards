@@ -31,7 +31,11 @@ class CardsImpl extends KeyManager {
     const validate = cardCreationValidation.validate(req.body)
 
     try {
-      this.APIkeyDepricationValidator(res.user)
+      this.APIkeyDepricationValidator({
+        user_id: res.user.user_id,
+        API_KEY: res.user.APIKey,
+        createdAt: res.user.createdAt,
+      })
 
       if (!!validate.error) {
         response({

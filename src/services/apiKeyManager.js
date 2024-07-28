@@ -1,10 +1,49 @@
 import { generateUserAccessKey } from '../utils/userUtils.js'
 import { dummyKeys } from '../../data/dummyData.js'
+import { queries } from '../../model/queries.model.js'
+import APIKey from '../../model/keystore.model.js'
+import { ACTIONS } from '../../model/index.js'
 
 const MAX_MONTH = 6
 class KeyManager {
-  validateAPIkey = (key = '') => {
-    return !!dummyKeys.filter(({ API_KEY }) => API_KEY === key).length
+  validateAPIkey = async (key = '', userId = '') => {
+    const keys = await this.getKeysFromDB()
+
+    if (!!key) {
+      const keyExists = keys.find(({ APIKey, user_id }) => {
+        if (!!userId) {
+          return APIKey === key && userId === user_id
+        } else {
+          return APIKey === key
+        }
+      })
+
+      if (!!keyExists) {
+        return {
+          ...keyExists,
+        }
+      }
+    }
+  }
+
+  getKeysFromDB = async () => {
+    return await queries.getFromDb({ collection: APIKey })
+  }
+
+  putToDB = async (args) => {
+    const APIkeys = await this.getKeysFromDB()
+    const currentUserKey = APIkeys.filter(
+      ({ user_id }) => user_id === args.user_id
+    )
+    if (!!currentUserKey.length) {
+      throw new Error('API key exists already')
+    }
+
+    await queries.updateToDb({
+      collection: APIKey,
+      data: [args],
+      action: ACTIONS.CREATE,
+    })
   }
 
   createAPIKey = async () => {
@@ -12,20 +51,23 @@ class KeyManager {
 
     do {
       key = generateUserAccessKey()
-    } while (this.validateAPIkey(key))
+    } while (!!(await this.validateAPIkey(key)))
     return {
       key,
       createdAt: new Date(),
     }
   }
 
-  APIkeyDepricationValidator = (args) => {
+  APIkeyDepricationValidator = async (args) => {
     this.argsValidator(args, 3)
-
     const { user_id, API_KEY } = args
-    const currentUserKey = dummyKeys.find(
-      (key) => key.user_id === user_id && key.API_KEY === API_KEY
-    )
+
+    const currentUserKey = await this.validateAPIkey(API_KEY, user_id)
+
+    if (!currentUserKey) {
+      throw new Error('INVALID_KEY: Invalid key or user is provided')
+    }
+
     const getMonthDifference =
       new Date().getMonth() + 1 - new Date(currentUserKey.createdAt).getMonth()
 

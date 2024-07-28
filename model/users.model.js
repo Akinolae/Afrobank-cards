@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 
-const cardSchema = new mongoose.Schema({
+const user = new mongoose.Schema({
   cardToken: {
     type: String,
     allowNull: false,
@@ -8,4 +8,4 @@ const cardSchema = new mongoose.Schema({
   },
 })
 
-export default mongoose.model('cards', cardSchema)
+export default mongoose.model('users', user)
