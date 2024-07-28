@@ -2,7 +2,7 @@ import KeyManager from './apiKeyManager.js'
 import { response } from './responseHandler.js'
 import { StatusCodes } from 'http-status-codes'
 import { getValueFromAttributes, getUserFromCognito } from '../../lib/aws.js'
-import { dummyKeys } from '../../data/dummyData.js'
+import * as uuid from 'uuid'
 
 class AuthImpl extends KeyManager {
   constructor() {
@@ -13,13 +13,31 @@ class AuthImpl extends KeyManager {
     try {
       const api_key = await this.createAPIKey()
 
-      response({ message: api_key, success: true, code: 200, res })
+      const { createdAt, key } = api_key
+
+      const params = {
+        APIKey: key,
+        createdAt,
+        user_id: uuid.v4(),
+      }
+
+      await this.putToDB(params)
+
+      response({ message: params, success: true, code: StatusCodes.OK, res })
     } catch (error) {
-      response({ message: error.message, success: false, code: 500, res })
+      response({
+        message: error.message,
+        success: false,
+        code: StatusCodes.INTERNAL_SERVER_ERROR,
+        res,
+      })
     }
   }
 
-  verifyUserAccessToken = async (token) => {
+  verifyUserAccessToken = async (req) => {
+    const authToken = req.headers.authorization
+    const token = !!authToken ? authToken.split(' ')[1] : ''
+
     try {
       const data = await getUserFromCognito(token)
       return data
@@ -37,8 +55,8 @@ class AuthImpl extends KeyManager {
       const authToken = req.headers.authorization
 
       if (!!authToken) {
-        const token = !!authToken ? authToken.split(' ')[1] : ''
-        verify = await this.verifyUserAccessToken(token)
+        verify = await this.verifyUserAccessToken(req)
+
         user = {
           user_id: getValueFromAttributes(
             verify.UserAttributes,
@@ -49,9 +67,10 @@ class AuthImpl extends KeyManager {
       }
 
       if (!!apiKey) {
-        verify = dummyKeys.find((keys) => keys.API_KEY === apiKey)
+        verify = await this.validateAPIkey(apiKey)
+
         user = {
-          ...verify,
+          ...verify._doc,
         }
       }
 
