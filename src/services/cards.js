@@ -13,7 +13,14 @@ class CardsImpl extends KeyManager {
   getCard = () => {}
 
   getCards = async (req, res) => {
+    console.log(res.user, 'user')
+
     try {
+      this.APIkeyDepricationValidator({
+        user_id: res.user.user_id,
+        API_KEY: res.user.APIKey,
+        createdAt: res.user.createdAt,
+      })
       const token = crypto.randomUUID()
       const hash = await bcrypt.hash(token, 10)
 
@@ -21,8 +28,12 @@ class CardsImpl extends KeyManager {
         hash,
         card: generateCreditCard(),
       }
+
+      console.log(message, 'mess')
       response({ code: 200, message, res, success: true })
     } catch (error) {
+      console.log(error, 'eerr')
+
       response({ code: 500, message: error, res, success: false })
     }
   }
