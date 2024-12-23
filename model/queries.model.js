@@ -5,13 +5,13 @@ import usersModel from './users.model.js'
 // Written to ensure reusability and easy debugging and also maintain a single source of truth
 
 const queries = {
-  updateToDb: async ({ data, action, collection = usersModel }) => {
+  updateToDb: async (data, action, collection = usersModel) => {
     return await dbActionGenerator(!action ? ACTIONS.UPDATEONE : action, {
       collection,
       data: [...data],
     })
   },
-  getFromDb: async ({ data = [], action, collection = usersModel }) => {
+  getFromDb: async (data = [], action, collection = usersModel) => {
     return await dbActionGenerator(!action ? ACTIONS.FIND : action, {
       collection,
       data,
