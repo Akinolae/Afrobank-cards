@@ -1,39 +1,35 @@
-import crypto from 'crypto'
 import bcrypt from 'bcryptjs'
 import KeyManager from './apiKeyManager.js'
 import { response } from './responseHandler.js'
-import { generateCreditCard } from '../utils/cardUtils.js'
+import { preparedCardData } from '../utils/cardUtils.js'
 import { cardCreationValidation } from '../validator/index.js'
+import { queries } from '../../model/queries.model.js'
+import cardsModel from '../../model/cards.model.js'
+import { ACTIONS } from '../../model/index.js'
 
 class CardsImpl extends KeyManager {
   constructor() {
     super()
   }
 
-  getCard = () => {}
-
   getCards = async (req, res) => {
-    console.log(res.user, 'user')
-
     try {
       this.APIkeyDepricationValidator({
         user_id: res.user.user_id,
         API_KEY: res.user.APIKey,
         createdAt: res.user.createdAt,
       })
-      const token = crypto.randomUUID()
-      const hash = await bcrypt.hash(token, 10)
 
-      const message = {
-        hash,
-        card: generateCreditCard(),
-      }
+      const cards = await queries.getFromDb([], ACTIONS.FIND, cardsModel)
 
-      console.log(message, 'mess')
-      response({ code: 200, message, res, success: true })
+      console.log(cards, 'cards')
+      response({
+        code: 200,
+        message: hash,
+        res,
+        success: true,
+      })
     } catch (error) {
-      console.log(error, 'eerr')
-
       response({ code: 500, message: error, res, success: false })
     }
   }
@@ -58,6 +54,16 @@ class CardsImpl extends KeyManager {
         return
       }
 
+      const _cardData = preparedCardData({ params: req.body })
+      const hash = await bcrypt.hash(JSON.stringify(_cardData), 10)
+
+      const resp = await queries.updateToDb(
+        [{ cardToken: hash }],
+        ACTIONS.CREATE,
+        cardsModel
+      )
+
+      resp.save()
       const message = 'Card created'
       response({ code: 200, message, res, success: true })
     } catch (error) {

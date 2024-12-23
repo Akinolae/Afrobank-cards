@@ -24,11 +24,7 @@ const dbActionGenerator = async (action = '', params = {}) => {
         case ACTIONS.FINDONE:
           return await params.collection.findOne(...params.data)
         case ACTIONS.CREATE:
-          {
-            const create = await new params.collection(...params.data)
-            create.save()
-          }
-          break
+          return await new params.collection(...params.data)
         case ACTIONS.FINDONEANDUPDATE:
           await params.collection.findOneAndUpdate(...params.data)
           break
