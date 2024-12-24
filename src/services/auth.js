@@ -70,13 +70,13 @@ class AuthImpl extends KeyManager {
         verify = await this.validateAPIkey(apiKey)
 
         user = {
-          ...verify._doc,
+          ...(verify?._doc ?? {}),
         }
       }
 
       !verify
         ? response({
-            message: !!apiKey ? 'Invalid API_KEY provided' : 'User not found',
+            message: !apiKey ? 'Invalid API_KEY provided' : 'User not found',
             success: false,
             code: StatusCodes.UNPROCESSABLE_ENTITY,
             res,
@@ -84,6 +84,8 @@ class AuthImpl extends KeyManager {
         : (res.user = user)
       !!verify && next()
     } catch (error) {
+      console.log(error, 'err')
+
       const err = error.toString()
       const errMessage = err.includes('invalid')
         ? error
