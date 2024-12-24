@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs'
 import KeyManager from './apiKeyManager.js'
 import { response } from './responseHandler.js'
 import { preparedCardData } from '../utils/cardUtils.js'
@@ -21,7 +20,10 @@ class CardsImpl extends KeyManager {
         createdAt: res.user.createdAt,
       })
 
-      const cards = await queries.getFromDb([], ACTIONS.FIND, cardsModel)
+      const cards = (
+        await queries.getFromDb([], ACTIONS.FIND, cardsModel)
+      ).filter((card) => card.user_id === res.user.user_id)
+
       const decryptCards = await Promise.all(
         cards.map(async (card) =>
           JSON.parse(useCrypto({ payLoad: card.cardToken, encrypt: false }))
@@ -63,7 +65,7 @@ class CardsImpl extends KeyManager {
       const cardHash = useCrypto({ payLoad: _cardData })
 
       const resp = await queries.updateToDb(
-        [{ cardToken: cardHash }],
+        [{ cardToken: cardHash, user_id: res.user.user_id }],
         ACTIONS.CREATE,
         cardsModel
       )
