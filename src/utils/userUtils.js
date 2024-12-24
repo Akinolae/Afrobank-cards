@@ -1,22 +1,7 @@
-import CryptoJS from 'crypto'
-
 const characterTypes = {
   NUMERIC: 'numeric',
   ALPHABETH: 'alphabeth',
   ALPHA_NUMERIC: 'alphanumeric',
-}
-
-const useCrypto = ({ payLoad = '', token, encrypt = true }) => {
-  let data
-  const message =
-    typeof payLoad === 'string' ? payLoad : JSON.stringify(payLoad)
-  if (encrypt) {
-    data = CryptoJS.AES.encrypt(message, token).toString()
-  } else {
-    const decryptCode = CryptoJS.AES.decrypt(message, token)
-    data = decryptCode.toString(CryptoJS.enc.Utf8)
-  }
-  return data
 }
 
 const generateString = ({ length, type = characterTypes.NUMERIC }) => {
@@ -47,4 +32,4 @@ const generateUserAccessKey = () => {
   return generateString({ length: 15, type: characterTypes.ALPHA_NUMERIC })
 }
 
-export { useCrypto, generateString, generateUserAccessKey, characterTypes }
+export { generateString, generateUserAccessKey, characterTypes }

@@ -1,6 +1,7 @@
 import { GenCC } from 'creditcard-generator'
 import * as uuid from 'uuid'
 import { generateString, characterTypes } from './userUtils.js'
+import CryptoJS from 'crypto-js'
 
 const generateCreditCard = (card_schema = 'Mastercard') => {
   return GenCC(card_schema)[0]
@@ -20,6 +21,19 @@ const dateExpiration = () => {
   }
 }
 
+const useCrypto = ({ payLoad = '', encrypt = true }) => {
+  let data
+  const message =
+    typeof payLoad === 'string' ? payLoad : JSON.stringify(payLoad)
+  if (encrypt) {
+    data = CryptoJS.AES.encrypt(message, process.env.TOKEN_SECRET).toString()
+  } else {
+    const decryptCode = CryptoJS.AES.decrypt(message, process.env.TOKEN_SECRET)
+    data = decryptCode.toString(CryptoJS.enc.Utf8)
+  }
+  return data
+}
+
 const preparedCardData = ({ params }) => {
   const cardNumber = generateCreditCard()
   const cvv = +generateCvv()
@@ -37,4 +51,4 @@ const preparedCardData = ({ params }) => {
   }
 }
 
-export { generateCreditCard, preparedCardData }
+export { generateCreditCard, preparedCardData, useCrypto }

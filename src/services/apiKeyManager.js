@@ -27,7 +27,7 @@ class KeyManager {
   }
 
   getKeysFromDB = async () => {
-    return await queries.getFromDb({ collection: APIKey })
+    return await queries.getFromDb([], ACTIONS.FIND, APIKey)
   }
 
   putToDB = async (args) => {
